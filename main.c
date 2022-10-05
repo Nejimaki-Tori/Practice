@@ -27,16 +27,22 @@ int main() {
     printf("Second matrix\n");
     printMatrix(arr2, n2, m2);
     printf("\n");
+    if(arr3 != NULL){
     printf("Matrix1 + Matrix2:\n");
     printMatrix(arr3, n1, m1);
     printf("\n");
+    }
+    if(arr4 != NULL){
     printf("Matrix1 * int:\n");
     printf("\n");
     printMatrix(arr4, n2, m2);
     printf("\n");
+    }
+    if(arr5 != NULL){
     printf("Matrix1 * Matrix2: \n");
     printMatrix(arr5, m1, n2);
     printf("\n");
+    }
     printf("Determinant of the first matrix is: \n");
     printf("%lf", det);
     return 0;
