@@ -428,6 +428,7 @@ int main(int argc, char** argv){
             printf("\n");
             free(str);
         }
+        fclose(f);
     } else { //неправильное число параметров
         printf("Wrong number of parameters!\n");
     }
