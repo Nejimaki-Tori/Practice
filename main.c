@@ -382,8 +382,8 @@ char** strPtr(char const * strCurrent, int * n) { //разбиение стро�
 
             return NULL;
         }
-        s[countStr + 1] = '\n';
-        s[countStr + 2] = '\0';
+        s[countStr] = '\n';
+        s[countStr + 1] = '\0';
         countArr++;
         if(countArr > mem){
             mem = mem * 2;
@@ -417,7 +417,6 @@ int main(int argc, char** argv){
         while ((str = getStr()) != NULL) { //ввод из stdin
             arr = strPtr(str, &countArr);
             printArr(arr, countArr);
-            printf("\n");
             free(str);
         }
     } else if (argc == 2){ //ввод из файла
@@ -425,7 +424,6 @@ int main(int argc, char** argv){
         while ((str = getStrFile(f)) != NULL) {
             arr = strPtr(str, &countArr);
             printArr(arr, countArr);
-            printf("\n");
             free(str);
         }
         fclose(f);
