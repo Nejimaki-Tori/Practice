@@ -1,185 +1,256 @@
-//практическая №1 вариант 7
-
 #include <iostream>
-#include <cmath>
+#include <string>
+
 using namespace std;
 
-class Rectangle{ //класс прямоугольников со сторонами, параллельными осям OX и OY
-    int point_x = 0;
-    int point_y = 0;
-    int side_vert = 0;
-    int side_hor = 0;
+class Game{
+protected:
+    string m_name; // название игры
+    int m_price; // цена игры
+    string m_genre; // жанр игры
+    bool inLibrary = false;
+    int lib;
+    virtual void isInLibrary (bool tmp) = 0;
+};
+
+class Steam: public Game {
 public:
-    void move();
-    void size_chng();
-    void min_rectangle(Rectangle & first, Rectangle & second);
-    void intersection(Rectangle & first, Rectangle & second);
-    void set_info() {
-        cout << "Введите координаты нижней левой точки прямоугольника - x и y, а также его две стороны a - вертикальную и b - горизонтальную\n";
-        cout << "X: ";
-        cin >> point_x;
-        cout << "Y: ";
-        cin >> point_y;
-        cout << "A: ";
-        cin >> side_vert;
-        cout << "B: ";
-        cin >> side_hor;
-        cout << endl;
+    Steam() {
+        m_name = "";
+        m_price = 0;
+        m_genre = "";
     }
-    void get_info() const {
-        cout << "Rectangle is: " << '\n';
-        cout << "X: " << point_x << endl;
-        cout << "Y: " << point_y << endl;
-        cout << "A: " << side_vert << endl;
-        cout << "B: " << side_hor << endl;
+
+    void isInLibrary(bool tmp) {
+        inLibrary = tmp;
+    }
+
+    Steam(string name, const int price, string genre) {
+        m_name = name;
+        m_price = price;
+        m_genre = genre;
+        Steam::count++;
+    }
+
+    virtual ~Steam() = default;
+
+    string getName() const {
+        return m_name;
+    }
+
+    void setName(string name) {
+        m_name = name;
+    }
+
+    void setLib(int n){
+        lib = n;
+    }
+
+    int getLib(){
+        return lib;
+    }
+
+    int getPrice() const { return m_price; }
+
+    void setPrice(int price) { m_price = price; }
+
+    string getGenre() const { return m_genre; }
+
+    void setGenre(string genre) { m_genre = genre; }
+
+    static int count; // количество игр в магазине
+
+    Steam &operator=(const Steam &other) { // перегрузка операции =
+        if (this != &other) {
+            m_name = other.m_name;
+            m_price = other.m_price;
+            m_genre = other.m_genre;
+        }
+        return *this;
+    }
+
+    bool getInLibrary(){
+        return inLibrary;
+    }
+
+    friend ostream &operator<<(ostream &os, const Steam &store) { // вывод на экран
+        os << "Game name: " << store.m_name << ", Genre: " << store.m_genre << ", Price: " << store.m_price;
+        return os;
     }
 };
 
-void Rectangle::move(){
-    int x, y;
-    cout << "Введите новые координаты нижней левой точки x и y: \n";
-    cin >> x >> y;
-    point_x = x;
-    point_y = y;
-}
+// Инициализация статических членов класса
+int Steam::count = 0;
 
-void Rectangle::size_chng() {
-    int a, b;
-    cout << "Введите размеры новых сторон прямоугольника a и b: \n";
-    cin >> a >> b;
-    side_vert = a;
-    side_hor = b;
-}
+class UserGameLibrary : public Steam {
+    Steam *m_library; // динамический массив игр
+    string l_name; //имя библиотеки
+    int m_librarySize; // размер библиотеки
+    int m_numGames = 0; // количество игр в библиотеке
+public:
 
-void Rectangle::min_rectangle(Rectangle & first, Rectangle & second){
-    int min_x, min_y, min_a, min_b, max_x, max_y, max_a, max_b;
-    if (first.point_x <= second.point_x){
-        min_x = first.point_x;
-        min_a = first.side_vert;
-        max_x = second.point_x;
-        max_a = second.side_vert;
-    } else {
-        min_x = second.point_x;
-        min_a = second.side_vert;
-        max_x = first.point_x;
-        max_a = first.side_vert;
-    }
-    if (first.point_y <= second.point_y){
-        min_y = first.point_y;
-        min_b = first.side_hor;
-        max_y = second.point_y;
-        max_b = second.side_hor;
-    } else {
-        min_y = second.point_y;
-        min_b = second.side_hor;
-        max_y = second.point_y;
-        max_b = second.side_hor;
-    }
-    if (min_y + min_b >= max_y + max_b){
-        side_vert = min_b;
-    } else if (min_y + min_b >= max_y) {
-        side_vert = min_b + abs(min_b - max_b);
-    } else {
-        side_vert = abs(max_y + max_b - min_y);
+    UserGameLibrary() {
+        m_library = nullptr;
+        m_librarySize = 0;
+        m_numGames = 0;
+        inLibrary = true;
+        Steam::count--;
     }
 
-    if (min_x + min_a >= max_x + max_a){
-        side_hor = min_a;
-    } else if (min_x + min_a >= max_x) {
-        side_hor = min_a + abs(min_a - max_a);
-    } else {
-        side_hor = abs(max_x + max_a - min_x);
-    }
-    point_x = min_x;
-    point_y = min_y;
-}
-
-void Rectangle::intersection(Rectangle & first, Rectangle & second){
-    int min_x, min_y, min_a, min_b, max_x, max_y;
-    if(first.point_y + first.side_vert <= second.point_y ||
-            first.point_x + first.side_hor <= second.point_x || second.point_y + second.side_vert <= first.point_y ||
-                second.point_x + second.side_hor <= first.point_x){ //нет пересечения
-        point_x = 0;
-        point_y = 0;
-        side_vert = 0;
-        side_hor = 0;
-        return;
-    }
-    //прямоугольники вложены в друг друга
-    if(first.point_y >= second.point_y && first.point_y + first.side_vert <= second.point_y + second.side_vert &&
-       first.point_x + first.side_hor <= second.point_x + second.side_hor && first.point_x >= second.point_x){
-        point_x = first.point_x;
-        point_y = first.point_y;
-        side_vert = first.side_vert;
-        side_hor = first.side_hor;
-        return;
-    }
-    if(second.point_y >= first.point_y && second.point_y + second.side_vert <= first.point_y + first.side_vert &&
-       second.point_x + second.side_hor <= first.point_x + first.side_hor && second.point_x >= first.point_x){
-        point_x = second.point_x;
-        point_y = second.point_y;
-        side_vert = second.side_vert;
-        side_hor = second.side_hor;
-        return;
-    }
-    if (first.point_x <= second.point_x){
-        min_x = first.point_x;
-        min_a = first.side_vert;
-        max_x = second.point_x;
-    } else {
-        min_x = second.point_x;
-        min_a = second.side_vert;
-        max_x = first.point_x;
-    }
-    if (first.point_y <= second.point_y){
-        min_y = first.point_y;
-        min_b = first.side_hor;
-        max_y = second.point_y;
-    } else {
-        min_y = second.point_y;
-        min_b = second.side_hor;
-        max_y = second.point_y;
+    virtual ~UserGameLibrary() {
+        delete[] m_library;
     }
 
-    point_x = max_x;
-    point_y = max_y;
-    side_vert = abs(min_a - abs(max_y - min_y));
-    side_hor = abs(min_b - abs(max_x - min_x));
-}
+    int getSize() const {
+        return m_librarySize;
+    }
+
+    explicit UserGameLibrary(string name = "", int librarySize = 0, int price = 0, string genre = "") : Steam(name, price, genre) { //создаем объект с помощью базового конструктора
+        inLibrary = true;
+        m_librarySize = librarySize;
+        m_library = new Steam[m_librarySize];
+        Steam::count--;
+    }
+
+    UserGameLibrary(const UserGameLibrary &other) : Steam(other) { //копирование
+        m_librarySize = other.m_librarySize;
+        m_library = new Steam[m_librarySize];
+        inLibrary = true;
+        for (int i = 0; i < m_librarySize; i++) {
+            m_library[i] = Steam(other.m_library[i]);
+        }
+    }
+
+    UserGameLibrary &operator=(const UserGameLibrary &other) { //перегрузка операции =
+        if (this != &other) {
+            inLibrary = true;
+            delete[] m_library;
+            m_library = new Steam[other.m_librarySize];
+            m_librarySize = other.m_librarySize;
+            m_numGames = other.m_numGames;
+            for (int i = 0; i < m_librarySize; i++) {
+                m_library[i] = Steam(other.m_library[i]);
+            }
+        }
+        return *this;
+    }
+
+    // Методы для добавления и удаления игры из библиотеки
+    void addGame(Steam &game) {
+        if (m_numGames < m_librarySize) {
+            m_library[m_numGames] = game;
+            game.isInLibrary(true);
+            game.setLib(m_numGames);
+            m_numGames++;
+            cout << game.getName() << " has been added to the library." << endl;
+        } else {
+            cout << "The library is full. Cannot add game " << game.getName() << endl;
+        }
+    }
+
+    void removeGame(Steam &game) {
+        if(game.getInLibrary()) {
+            int index = game.getLib();
+            game.isInLibrary(false);
+            if (index >= 0 && index <= m_numGames) {
+                m_library[index].isInLibrary(false);
+                cout << "Game " << m_library[index].getName() << " has been removed from the library." << endl;
+                for (int i = index; i < m_numGames - 1; i++) {
+                    m_library[i] = m_library[i + 1];
+                }
+                m_numGames--;
+            } else {
+                throw out_of_range("Index out of range!"); //кидаемся исключением "вне массива"
+            }
+        } else {
+            throw out_of_range("Index out of range!"); //кидаемся исключением "вне массива"
+        }
+    }
+
+    int getNumGames() const {
+        return m_numGames;
+    }
+
+    // Перегрузка операции вывода на экран
+    friend ostream &operator<<(ostream &os, const UserGameLibrary &library) {
+        os << "Library of user " << library.getName() << ":" << endl;
+        for (int i = 0; i < library.m_numGames; i++) {
+            os << library.m_library[i] << endl; //вызываем операцию вывода для базового класса
+        }
+        return os;
+    }
+
+    Steam &operator[](int index) const {
+        if (index < 0 || index >= m_numGames) {
+           throw out_of_range("Index out of range!"); //кидаемся исключением "вне массива"
+        }
+        return m_library[index];
+    }
+
+};
 
 int main() {
-    int mode;
-    Rectangle p, q;
-    Rectangle obj;
-    cout << "Выберите режим работы: 1 - перемещение прямоугольника, 2 - изменение размеров прямоугольника, 3 - построение наименьшего прямоугольника, "
-            "содержащего два других, 4 - построение прямоугольника на пересечении\n";
-    cin >> mode;
-    cout << '\n';
-    switch(mode){
-        case 1:
-            obj.set_info();
-            obj.move();
-            obj.get_info();
-            break;
-        case 2:
-            obj.set_info();
-            obj.size_chng();
-            obj.get_info();
-            break;
-        case 3:
-            p.set_info();
-            q.set_info();
-            obj.min_rectangle(p, q);
-            obj.get_info();
-            break;
-        case 4:
-            p.set_info();
-            q.set_info();
-            obj.intersection(p, q);
-            obj.get_info();
-            break;
-        default:
-            return 1;
+    try {
+        // Создаем "игры" класса Steam для добавления в библиотеку
+        Steam game1 = Steam("Game 1", 0, "Default");
+        Steam game2 = Steam("Minecraft", 5, "Sandbox");
+        Steam game3 = Steam("RDR 2", 15, "Action-adventure");
+        Steam game4 = Steam("Hollow Knight", 3, "Platformer");
+        Steam game5 = Steam("Wallpaper Engine", 2, "Utility");
+
+        cout << "Количество игр в Steam: " << Steam::count << endl;
+
+        //Инициализируем библиотек
+        UserGameLibrary myLibrary("Denis", 4);
+        UserGameLibrary yourLibrary("default_username", 15);
+
+        //Добавляем игры
+        myLibrary.addGame(game1);
+        myLibrary.addGame(game2);
+        myLibrary.addGame(game3);
+        myLibrary.addGame(game4);
+        myLibrary.addGame(game5);
+        cout << endl;
+
+        yourLibrary = myLibrary;
+
+        //Задаем параметры у "дефолтной" игры
+        yourLibrary[0].setName("Tetris");
+        yourLibrary[0].setPrice(1);
+        yourLibrary[0].setGenre("Arcade");
+        cout << "Название: " << yourLibrary[0].getName() << endl;
+        cout << "Цена: " << yourLibrary[0].getPrice() << endl;
+        cout << "Жанр: " << yourLibrary[0].getGenre() << endl;
+
+        cout << endl;
+
+        cout << "Максимальный размер библиотеки у пользователя " << myLibrary.getName() << " - " << myLibrary.getSize() << endl;
+
+        cout << endl;
+
+        for (int i = 1; i < myLibrary.getNumGames(); i++) { //выводим содержимое библиотеки с какого-то индекса по какой-то
+            cout << "Название игры: " << myLibrary[i].getName() << endl;
+            cout << "Цена игры: " << myLibrary[i].getPrice() << endl;
+        }
+
+        cout << endl;
+
+        myLibrary.removeGame(game1); // Удаляем игру RDR2
+
+        cout << endl;
+
+        if(game1.getInLibrary()){
+            cout << "Игра " << game1.getName() << " в библиотеке" << endl;
+        } else {
+            cout << "Игра " << game1.getName() << " не в библиотеке" << endl;
+        }
+
+        cout << endl;
+        cout << myLibrary << endl;// Выводим полностью обновленное содержимое библиотеки на экран
+        cout << endl;
+        cout << yourLibrary << endl;
+    } catch (const std::out_of_range &e) {
+        cerr << "Error: " << e.what() << endl;
     }
     return 0;
 }
